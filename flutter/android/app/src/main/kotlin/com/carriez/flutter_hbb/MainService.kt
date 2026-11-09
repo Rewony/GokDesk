@@ -47,7 +47,7 @@ import java.nio.ByteBuffer
 import kotlin.math.max
 import kotlin.math.min
 
-const val DEFAULT_NOTIFY_TITLE = "RustDesk"
+const val DEFAULT_NOTIFY_TITLE = "GökDesk"
 const val DEFAULT_NOTIFY_TEXT = "Service is running"
 const val DEFAULT_NOTIFY_ID = 1
 const val NOTIFY_ID_OFFSET = 100
@@ -66,24 +66,18 @@ class MainService : Service() {
     @Keep
     @RequiresApi(Build.VERSION_CODES.N)
     fun rustPointerInput(kind: Int, mask: Int, x: Int, y: Int) {
-        // turn on screen with LEFT_DOWN when screen off
-        if (!powerManager.isInteractive && (kind == 0 || mask == LEFT_DOWN)) {
-            if (wakeLock.isHeld) {
-                Log.d(logTag, "Turn on Screen, WakeLock release")
-                wakeLock.release()
+        // Automatically wake screen if currently off, and continue dispatching input
+        if (!powerManager.isInteractive) {
+            wakeUpScreen(15000)
+        }
+        when (kind) {
+            0 -> { // touch
+                InputService.ctx?.onTouchInput(mask, x, y)
             }
-            Log.d(logTag,"Turn on Screen")
-            wakeLock.acquire(5000)
-        } else {
-            when (kind) {
-                0 -> { // touch
-                    InputService.ctx?.onTouchInput(mask, x, y)
-                }
-                1 -> { // mouse
-                    InputService.ctx?.onMouseInput(mask, x, y)
-                }
-                else -> {
-                }
+            1 -> { // mouse
+                InputService.ctx?.onMouseInput(mask, x, y)
+            }
+            else -> {
             }
         }
     }
@@ -128,11 +122,13 @@ class MainService : Service() {
                         translate("Share screen")
                     }
                     if (authorized) {
+                        wakeUpScreen(15000)
                         if (!isFileTransfer && !isStart) {
                             startCapture()
                         }
                         onClientAuthorizedNotification(id, type, username, peerId)
                     } else {
+                        wakeUpScreen(15000)
                         loginRequestNotification(id, type, username, peerId)
                     }
                 } catch (e: JSONException) {
@@ -188,6 +184,28 @@ class MainService : Service() {
 
     private val powerManager: PowerManager by lazy { applicationContext.getSystemService(Context.POWER_SERVICE) as PowerManager }
     private val wakeLock: PowerManager.WakeLock by lazy { powerManager.newWakeLock(PowerManager.ACQUIRE_CAUSES_WAKEUP or PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "rustdesk:wakelock")}
+    private val sessionWakeLock: PowerManager.WakeLock by lazy {
+        powerManager.newWakeLock(
+            PowerManager.SCREEN_BRIGHT_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP or PowerManager.ON_AFTER_RELEASE,
+            "rustdesk:session_wakelock"
+        ).apply {
+            setReferenceCounted(false)
+        }
+    }
+
+    fun wakeUpScreen(durationMs: Long = 10000) {
+        try {
+            if (!powerManager.isInteractive) {
+                if (wakeLock.isHeld) {
+                    wakeLock.release()
+                }
+                Log.d(logTag, "Waking up tablet screen (interactive was false)")
+                wakeLock.acquire(durationMs)
+            }
+        } catch (e: Exception) {
+            Log.e(logTag, "wakeUpScreen error: ${e.message}")
+        }
+    }
 
     companion object {
         private var _isReady = false // media permission ready status
@@ -260,6 +278,11 @@ class MainService : Service() {
 
     override fun onDestroy() {
         checkMediaPermission()
+        try {
+            if (sessionWakeLock.isHeld) {
+                sessionWakeLock.release()
+            }
+        } catch (_: Exception) {}
         stopService(Intent(this, FloatingWindowService::class.java))
         super.onDestroy()
     }
@@ -609,6 +632,14 @@ class MainService : Service() {
         captureRestartInVoiceCall = false
         checkMediaPermission()
         _isStart = true
+        try {
+            if (!sessionWakeLock.isHeld) {
+                sessionWakeLock.acquire()
+                Log.d(logTag, "Acquired sessionWakeLock: keeping screen on during active connection")
+            }
+        } catch (e: Exception) {
+            Log.e(logTag, "Failed to acquire sessionWakeLock: ${e.message}")
+        }
         FFI.setFrameRawEnable("video",true)
         MainActivity.rdClipboardManager?.setCaptureStarted(_isStart)
         return true
@@ -630,6 +661,14 @@ class MainService : Service() {
     @Synchronized
     fun stopCapture() {
         Log.d(logTag, "Stop Capture")
+        try {
+            if (sessionWakeLock.isHeld) {
+                sessionWakeLock.release()
+                Log.d(logTag, "Released sessionWakeLock on session end")
+            }
+        } catch (e: Exception) {
+            Log.e(logTag, "Failed to release sessionWakeLock: ${e.message}")
+        }
         captureRestartPending = false
         captureRestartInVoiceCall = false
         FFI.setFrameRawEnable("video",false)
@@ -816,13 +855,13 @@ class MainService : Service() {
     private fun initNotification() {
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationChannel = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channelId = "RustDesk"
-            val channelName = "RustDesk Service"
+            val channelId = "GokDesk"
+            val channelName = "GökDesk Service"
             val channel = NotificationChannel(
                 channelId,
                 channelName, NotificationManager.IMPORTANCE_HIGH
             ).apply {
-                description = "RustDesk Service Channel"
+                description = "GökDesk Service Channel"
             }
             channel.lightColor = Color.BLUE
             channel.lockscreenVisibility = Notification.VISIBILITY_PRIVATE

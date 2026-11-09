@@ -19,28 +19,41 @@ class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         Log.d(logTag, "onReceive ${intent.action}")
 
-        if (Intent.ACTION_BOOT_COMPLETED == intent.action || DEBUG_BOOT_COMPLETED == intent.action) {
-            // check SharedPreferences config
+        val isBootAction = intent.action in listOf(
+            Intent.ACTION_BOOT_COMPLETED,
+            Intent.ACTION_LOCKED_BOOT_COMPLETED,
+            Intent.ACTION_USER_PRESENT,
+            "android.intent.action.QUICKBOOT_POWERON",
+            DEBUG_BOOT_COMPLETED
+        )
+
+        if (isBootAction) {
+            // check SharedPreferences config - default to true for kiosk/unattended tablet management
             val prefs = context.getSharedPreferences(KEY_SHARED_PREFERENCES, FlutterActivity.MODE_PRIVATE)
-            if (!prefs.getBoolean(KEY_START_ON_BOOT_OPT, false)) {
-                Log.d(logTag, "KEY_START_ON_BOOT_OPT is false")
+            if (!prefs.getBoolean(KEY_START_ON_BOOT_OPT, true)) {
+                Log.d(logTag, "KEY_START_ON_BOOT_OPT is disabled by user configuration")
                 return
             }
-            // check pre-permission
+
+            // Check permissions non-fatally; still proceed to start service
             if (!XXPermissions.isGranted(context, REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, SYSTEM_ALERT_WINDOW)){
-                Log.d(logTag, "REQUEST_IGNORE_BATTERY_OPTIMIZATIONS or SYSTEM_ALERT_WINDOW is not granted")
-                return
+                Log.w(logTag, "REQUEST_IGNORE_BATTERY_OPTIMIZATIONS or SYSTEM_ALERT_WINDOW not granted yet, starting service anyway")
             }
 
             val it = Intent(context, MainService::class.java).apply {
                 action = ACT_INIT_MEDIA_PROJECTION_AND_SERVICE
                 putExtra(EXT_INIT_FROM_BOOT, true)
             }
-            Toast.makeText(context, "RustDesk is Open", Toast.LENGTH_LONG).show()
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(it)
-            } else {
-                context.startService(it)
+
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    context.startForegroundService(it)
+                } else {
+                    context.startService(it)
+                }
+                Log.d(logTag, "MainService started successfully from boot/wake action")
+            } catch (e: Exception) {
+                Log.e(logTag, "Failed to start MainService on boot: ${e.message}", e)
             }
         }
     }
