@@ -13,6 +13,8 @@ on:
         type: boolean
         default: false
 
+permissions: write-all
+
 # NOTE: F-Droid builder script 'flutter/build_fdroid.sh' reads environment
 # variables from this workflow!
 #
