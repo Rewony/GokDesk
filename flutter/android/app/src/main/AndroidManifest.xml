@@ -51,7 +51,7 @@
             android:name=".InputService"
             android:enabled="true"
             android:exported="false"
-            android:label="GökDesk Input"
+            android:label="GokDesk Input"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />
@@ -82,6 +82,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="rustdesk" />
+                <data android:scheme="gokdesk" />
             </intent-filter>
         </activity>
 

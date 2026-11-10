@@ -1,11 +1,11 @@
-# RustDesk へのコントリビュート
+﻿# GokDesk へのコントリビュート
 
-RustDesk は皆さんからのコントリビュートを歓迎します。ご協力いただける方のガイドラインは
+GokDesk は皆さんからのコントリビュートを歓迎します。ご協力いただける方のガイドラインは
 以下の通りです:
 
 ## コントリビューション
 
-RustDesk またはその依存関係へのコントリビュートは、GitHub のプルリクエストの形で行ってください。
+GokDesk またはその依存関係へのコントリビュートは、GitHub のプルリクエストの形で行ってください。
 それぞれのプルリクエストは、コアコントリビューター（パッチの適用を許可されている人）によってレビューされ、
 メインツリーに適用されるか、必要な変更についてのフィードバックが与えられます。
 コアコントリビューターからのものであっても、すべてのコントリビューターはこのフォーマットに従うべきです。
@@ -34,8 +34,8 @@ RustDesk またはその依存関係へのコントリビュートは、GitHub �
 
 ## 行動規範
 
-https://github.com/rustdesk/rustdesk/blob/master/docs/CODE_OF_CONDUCT.md
+https://github.com/Rewony/GokDesk/blob/master/docs/CODE_OF_CONDUCT.md
 
 ## コミュニケーション
 
-RustDesk のコントリビューターは、[Discord](https://discord.gg/nDceKgxnkV) を良く使っています。
+GokDesk のコントリビューターは、[Discord](https://discord.gg/nDceKgxnkV) を良く使っています。

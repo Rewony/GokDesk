@@ -1,11 +1,11 @@
-# Bidrag til RustDesk
+﻿# Bidrag til GokDesk
 
-RustDesk er åpene for bidrag fra alle. Her er reglene for de som har lyst til å
+GokDesk er åpene for bidrag fra alle. Her er reglene for de som har lyst til å
 hjelpe oss:
 
 ## Bidrag
 
-Bidrag til RustDesk eller deres avhengigheter burde være i form av GitHub pull requests.
+Bidrag til GokDesk eller deres avhengigheter burde være i form av GitHub pull requests.
 Hver pull request vill bli sett igjennom av en kjerne bidrager (noen med autoritet til
 å godkjenne endringene) og enten bli sendt til main treet eller respondert med
 tilbakemelding på endringer som er nødvendig. Alle bidrag burde følge dette formate
@@ -39,8 +39,8 @@ For spesefike git instruksjoner, se [GitHub workflow 101](https://github.com/ser
 
 ## Oppførsel
 
-https://github.com/rustdesk/rustdesk/blob/master/docs/CODE_OF_CONDUCT.md
+https://github.com/Rewony/GokDesk/blob/master/docs/CODE_OF_CONDUCT.md
 
 ## Kommunikasjon
 
-RustDesk bidragere burker [Discord](https://discord.gg/nDceKgxnkV).
+GokDesk bidragere burker [Discord](https://discord.gg/nDceKgxnkV).

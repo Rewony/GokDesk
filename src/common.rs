@@ -121,6 +121,9 @@ impl Drop for SimpleCallOnReturn {
 }
 
 pub fn global_init() -> bool {
+    if *hbb_common::config::APP_NAME.read().unwrap() == "RustDesk" {
+        *hbb_common::config::APP_NAME.write().unwrap() = "GokDesk".to_string();
+    }
     #[cfg(all(target_os = "linux", feature = "drm"))]
     crate::platform::linux::dispatch_wayland_display_probe();
     #[cfg(target_os = "linux")]
@@ -1226,7 +1229,7 @@ pub async fn do_check_software_update() -> hbb_common::ResultType<()> {
 pub fn get_app_name() -> String {
     let name = hbb_common::config::APP_NAME.read().unwrap().clone();
     if name == "RustDesk" {
-        "GökDesk".to_string()
+        "GokDesk".to_string()
     } else {
         name
     }
@@ -1234,7 +1237,7 @@ pub fn get_app_name() -> String {
 
 #[inline]
 pub fn is_rustdesk() -> bool {
-    hbb_common::config::APP_NAME.read().unwrap().eq("RustDesk")
+    false
 }
 
 #[inline]
